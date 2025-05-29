@@ -12,11 +12,16 @@ runs = st.slider("Number of simulations", min_value=1000, max_value=10000, step=
 progress_bar = st.progress(0)
 with st.spinner(f"Simulating {runs:,} seasons..."):
     placements = []
+    
     for i in range(runs):
+    try:
         df = simulate_season()
         placements.append(df)
-        if i % 100 == 0:
-            progress_bar.progress(i / runs)
+    except Exception as e:
+        st.warning(f"Simulation {i+1} failed: {e}")
+    if i % 100 == 0:
+        progress_bar.progress(i / runs)
+
 
 
 # Run simulations
@@ -26,7 +31,12 @@ placements = []
 
 
 # Aggregate results
-all_tables = pd.concat(placements)
+if placements:
+    all_tables = pd.concat(placements)
+else:
+    st.error("No simulation data was generated. Please try again.")
+    st.stop()
+
 position_counts = {team: Counter() for team in df['Team']}
 
 for table in placements:
