@@ -69,14 +69,20 @@ def get_team_metrics(table, team):
     return 999, -1  # fallback
 
 # Function to get the best/worst table for the selected team
+def get_team_metrics(table, team):
+    row = table[table['Team'] == team]
+    if row.empty:
+        return (999, -1)
+    return int(row['Position'].values[0]), int(row['Pts'].values[0])
+
 def get_best_or_worst_table(placements, team, mode="Best"):
-    reverse = mode == "Worst"
+    if mode == "Best":
+        # Best: prioritize lowest position, then highest points
+        return min(placements, key=lambda tbl: (get_team_metrics(tbl, team)[0], -get_team_metrics(tbl, team)[1]))
+    else:
+        # Worst: prioritize highest position, then lowest points
+        return max(placements, key=lambda tbl: (get_team_metrics(tbl, team)[0], get_team_metrics(tbl, team)[1]))
 
-    def sort_key(tbl):
-        pos, pts = get_team_metrics(tbl, team)
-        return (pos, -pts) if not reverse else (pos, pts)
-
-    return sorted(placements, key=sort_key, reverse=reverse)[0]
 
 # Get the table and show it
 selected_table = get_best_or_worst_table(placements, selected_team, best_or_worst)
