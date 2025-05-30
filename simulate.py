@@ -19,16 +19,16 @@ RATINGS = {
     "Tottenham": 69,
     "Nottingham Forest": 63,
     "Brighton": 59,
-    "Bournemouth": 56,
-    "West Ham": 54,
-    "Everton": 54,
-    "Crystal Palace": 53,
-    "Fulham": 52,
-    "Brentford": 50,
-    "Wolverhampton": 50,
-    "Burnley": 49,
-    "Leeds": 49,
-    "Sunderland": 47
+    "Bournemouth": 57,
+    "West Ham": 55,
+    "Everton": 55,
+    "Crystal Palace": 54,
+    "Fulham": 53,
+    "Brentford": 51,
+    "Wolverhampton": 51,
+    "Burnley": 48,
+    "Leeds": 48,
+    "Sunderland": 46
 }
 
 
