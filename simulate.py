@@ -51,9 +51,31 @@ def simulate_season():
             expected_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
             expected_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
 
-            # Simulate goals using Poisson distribution
-            home_goals = np.random.poisson(expected_home_goals)
-            away_goals = np.random.poisson(expected_away_goals)
+# Simulate goals using Poisson distribution
+home_goals = np.random.poisson(expected_home_goals)
+away_goals = np.random.poisson(expected_away_goals)
+
+# Adjust scores to reinforce realism
+if home_goals > away_goals:
+    margin = home_goals - away_goals
+    if margin == 1 and np.random.rand() < 0.6:
+        home_goals += 1  # boost small wins
+    elif margin >= 3 and np.random.rand() < 0.3:
+        away_goals += 1  # soften big wins
+
+elif away_goals > home_goals:
+    margin = away_goals - home_goals
+    if margin == 1 and np.random.rand() < 0.6:
+        away_goals += 1
+    elif margin >= 3 and np.random.rand() < 0.3:
+        home_goals += 1
+
+else:  # draw
+    if home_goals > 2:
+        home_goals = away_goals = 2  # cap high-scoring draws
+    if home_goals == 0 and np.random.rand() < 0.3:
+        home_goals = away_goals = 1  # fewer 0-0s
+
 
 
             table[home]['GF'] += home_goals
