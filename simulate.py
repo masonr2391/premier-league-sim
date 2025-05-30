@@ -4,22 +4,38 @@ import random
 
 # Hardcoded 2025–26 teams (edit names/strengths as needed)
 TEAMS = [
-    "Liverpool", "Arsenal", "Manchester City", "Chelsea", "Newcastle United",
-    "Nottingham Forest", "Bournemouth", "Aston Villa", "Brentford", "Brighton",
-    "Crystal Palace", "Fulham", "Tottenham Hotspur", "Leeds United",
-    "West Ham United", "Manchester United", "Wolverhampton", "Burnley",
-    "Sunderland"
+teams = [
+    'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
+    'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham',
+    'Liverpool', 'Luton', 'Man City', 'Man Utd', 'Newcastle',
+    'Nottingham Forest', 'Sheffield Utd', 'Tottenham', 'West Ham', 'Wolves'
 ]
 
+
 # Simplified team ratings (higher = stronger team)
-RATINGS = {
-    "Liverpool": 95, "Arsenal": 91, "Manchester City": 89, "Chelsea": 83,
-    "Newcastle United": 82, "Tottenham Hotspur": 75, "Manchester United": 74,
-    "Aston Villa": 72, "Brighton": 70, "Brentford": 69, "Bournemouth": 68,
-    "Nottingham Forest": 68, "Crystal Palace": 67, "Fulham": 66,
-    "Leeds United": 64, "West Ham United": 63, "Wolverhampton": 62,
-    "Burnley": 58, "Sunderland": 50
+team_ratings = {
+    "Liverpool": 99,
+    "Arsenal": 95,
+    "Manchester City": 92,
+    "Chelsea": 84,
+    "Newcastle United": 83,
+    "Tottenham Hotspur": 75,
+    "Manchester United": 74,
+    "Aston Villa": 72,
+    "Brighton": 69,
+    "Brentford": 67,
+    "Bournemouth": 67,
+    "Nottingham Forest": 67,
+    "Crystal Palace": 66,
+    "Fulham": 64,
+    "Leeds United": 61,
+    "West Ham United": 62,
+    "Wolverhampton": 60,
+    "Burnley": 54,
+    "Sunderland": 46,
+    "Everton": 69
 }
+
 
 def simulate_season():
     # Create blank table
@@ -53,8 +69,10 @@ def simulate_season():
                 table[home]['D'] += 1
                 table[away]['D'] += 1
 
-    df = pd.DataFrame(table).T
-    df['GD'] = df['GF'] - df['GA']
-    df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
-    df['Position'] = range(1, len(df)+1)
-    return df.reset_index().rename(columns={'index': 'Team'})
+df = pd.DataFrame(table).T
+df['GD'] = df['GF'] - df['GA']
+df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
+df = df.reset_index().rename(columns={'index': 'Team'})
+df['Position'] = range(1, len(df) + 1)
+return df
+
