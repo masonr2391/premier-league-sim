@@ -13,29 +13,26 @@ progress_bar = st.progress(0)
 with st.spinner(f"Simulating {runs:,} seasons..."):
     placements = []
     
-    for i in range(runs):
-    try:
-        df = simulate_season()
-        placements.append(df)
-    except Exception as e:
-        st.warning(f"Simulation {i+1} failed: {e}")
-    if i % 100 == 0:
-        progress_bar.progress(i / runs)
-
-
-
-# Run simulations
-st.write(f"Simulating {runs} seasons... This may take a few seconds.")
 placements = []
+progress_bar = st.progress(0)
 
+with st.spinner(f"Simulating {runs:,} seasons..."):
+    for i in range(runs):
+        try:
+            df = simulate_season()
+            placements.append(df)
+        except Exception as e:
+            st.warning(f"Simulation {i+1} failed: {e}")
 
+        if i % 100 == 0:
+            progress_bar.progress(i / runs)
 
-# Aggregate results
 if placements:
     all_tables = pd.concat(placements)
 else:
     st.error("No simulation data was generated. Please try again.")
     st.stop()
+
 
 position_counts = {team: Counter() for team in df['Team']}
 
