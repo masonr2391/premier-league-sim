@@ -27,6 +27,7 @@ if "placements" not in st.session_state or st.session_state.runs != runs:
 
 placements = st.session_state.placements
 
+
         try:
             df = simulate_season()
             placements.append(df)
