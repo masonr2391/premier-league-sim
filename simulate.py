@@ -44,17 +44,16 @@ def simulate_season():
             if i == j:
                 continue
 
-         home_rating = RATINGS[home]
-away_rating = RATINGS[away]
+            home_rating = RATINGS[home]
+            away_rating = RATINGS[away]
 
-# Scale ratings into expected goals
-# The higher the rating, the more attacking strength
-expected_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
-expected_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
+            # Scale ratings into expected goals
+            expected_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
+            expected_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
 
-# Simulate goals using Poisson distribution
-home_goals = np.random.poisson(expected_home_goals)
-away_goals = np.random.poisson(expected_away_goals)
+            # Simulate goals using Poisson distribution
+            home_goals = np.random.poisson(expected_home_goals)
+            away_goals = np.random.poisson(expected_away_goals)
 
 
             table[home]['GF'] += home_goals
