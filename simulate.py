@@ -3,7 +3,7 @@ import pandas as pd
 import random
 
 # Hardcoded 2025–26 teams (edit names/strengths as needed)
-TEAMS = [
+
 teams = [
     'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
     'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham',
@@ -16,11 +16,11 @@ teams = [
 team_ratings = {
     "Liverpool": 99,
     "Arsenal": 95,
-    "Manchester City": 92,
+    "Man City": 92,
     "Chelsea": 84,
     "Newcastle United": 83,
     "Tottenham Hotspur": 75,
-    "Manchester United": 74,
+    "Man Utd": 74,
     "Aston Villa": 72,
     "Brighton": 69,
     "Brentford": 67,
