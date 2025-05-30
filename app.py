@@ -7,7 +7,7 @@ st.set_page_config(page_title="Premier League Simulator", layout="wide")
 
 st.title("🔮 2025–26 Premier League Simulator")
 
-runs = st.slider("Number of simulations", min_value=1000, max_value=10000, step=1000, value=1000)
+runs = st.slider("Number of simulations", min_value=1, max_value=10000, step=1, value=1000)
 
 if "placements" not in st.session_state or st.session_state.runs != runs:
     st.session_state.placements = []
