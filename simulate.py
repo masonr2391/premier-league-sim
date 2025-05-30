@@ -35,19 +35,6 @@ RATINGS = {
 AVERAGE_GOALS_PER_GAME = 2.45  # More in line with PL average
 HOME_ADVANTAGE = 1.1  # 10% boost to expected goals at home
 
-
-
-def simulate_season():
-    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
-    for i, home in enumerate(TEAMS):
-        for j, away in enumerate(TEAMS):
-            if i == j:
-                continue
-
-            home_rating = RATINGS[home]
-            away_rating = RATINGS[away]
-
-            # Scale ratings into expected goals
 # Apply a realism modifier for weak teams
 def adjust_for_weak_team(team, base_expected):
     if RATINGS[team] <= 50:
@@ -57,12 +44,23 @@ def adjust_for_weak_team(team, base_expected):
     else:
         return base_expected
 
-raw_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
-raw_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
+def simulate_season():
+    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
+    
+    for i, home in enumerate(TEAMS):
+        for j, away in enumerate(TEAMS):
+            if i == j:
+                continue
 
-expected_home_goals = adjust_for_weak_team(home, raw_home_goals)
-expected_away_goals = adjust_for_weak_team(away, raw_away_goals)
+            home_rating = RATINGS[home]
+            away_rating = RATINGS[away]
 
+            # Scale ratings into expected goals
+            raw_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
+            raw_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
+
+            expected_home_goals = adjust_for_weak_team(home, raw_home_goals)
+            expected_away_goals = adjust_for_weak_team(away, raw_away_goals)
 
             # Simulate goals using Poisson distribution
             home_goals = np.random.poisson(expected_home_goals)
@@ -83,21 +81,17 @@ expected_away_goals = adjust_for_weak_team(away, raw_away_goals)
                 elif margin >= 3 and np.random.rand() < 0.3:
                     home_goals += 1
 
-else:  # draw
-    if home_goals > 2:
-        home_goals = away_goals = 2  # cap high-scoring draws
-    elif home_goals == 0 and np.random.rand() < 0.3:
-        home_goals = away_goals = 1  # fewer 0-0s
-    elif np.random.rand() < 0.4:
-        # convert some draws to wins to reduce total draw count
-        if np.random.rand() < 0.5:
-            home_goals += 1
-        else:
-            away_goals += 1
-
-
-
-
+            else:  # draw
+                if home_goals > 2:
+                    home_goals = away_goals = 2  # cap high-scoring draws
+                elif home_goals == 0 and np.random.rand() < 0.3:
+                    home_goals = away_goals = 1  # fewer 0-0s
+                elif np.random.rand() < 0.4:
+                    # convert some draws to wins to reduce total draw count
+                    if np.random.rand() < 0.5:
+                        home_goals += 1
+                    else:
+                        away_goals += 1
 
             table[home]['GF'] += home_goals
             table[home]['GA'] += away_goals
