@@ -55,7 +55,7 @@ def simulate_season():
             home_rating = RATINGS[home]
             away_rating = RATINGS[away]
 
-            home_strength = home_rating + 5
+            home_strength = home_rating + 5  # Home boost
             away_strength = away_rating
 
             home_expectation = (home_strength / (home_strength + away_strength)) * AVERAGE_GOALS_PER_GAME
@@ -88,22 +88,28 @@ def simulate_season():
                 table[home]['D'] += 1
                 table[away]['D'] += 1
 
-    # Convert to DataFrame
+    # Convert to DataFrame and rank
     df = pd.DataFrame(table).T
     df['GD'] = df['GF'] - df['GA']
     df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
     df = df.reset_index().rename(columns={'index': 'Team'})
     df['Position'] = range(1, len(df) + 1)
 
-    # --- 🔧 Normalize point distribution ---
+    # --- 🔧 Soft-normalize point totals with noise ---
     current_max = df['Pts'].max()
-    target_max = 92  # realistic top score
     current_min = df['Pts'].min()
-    target_min = 25  # realistic 20th place
+    target_max = 92 + np.random.randint(-3, 4)  # ~89–95
+    target_min = 24 + np.random.randint(-4, 5)  # ~20–28
 
-    # Apply linear scaling
-    df['Pts'] = df['Pts'].apply(lambda x: round(
-        ((x - current_min) / (current_max - current_min)) * (target_max - target_min) + target_min
-    ))
+    def rescale_with_noise(x):
+        scaled = ((x - current_min) / (current_max - current_min)) * (target_max - target_min) + target_min
+        noise = np.random.normal(0, 1.5)  # small Gaussian noise
+        return max(0, round(scaled + noise))
+
+    df['Pts'] = df['Pts'].apply(rescale_with_noise)
+
+    # Sort again in case noise causes rank swaps
+    df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False).reset_index(drop=True)
+    df['Position'] = range(1, len(df) + 1)
 
     return df
