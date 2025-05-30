@@ -77,11 +77,17 @@ def get_team_metrics(table, team):
 
 def get_best_or_worst_table(placements, team, mode="Best"):
     if mode == "Best":
-        # Best: prioritize lowest position, then highest points
+        # Best: prioritize best (lowest) position, then highest points
         return min(placements, key=lambda tbl: (get_team_metrics(tbl, team)[0], -get_team_metrics(tbl, team)[1]))
     else:
-        # Worst: prioritize highest position, then lowest points
-        return max(placements, key=lambda tbl: (get_team_metrics(tbl, team)[0], get_team_metrics(tbl, team)[1]))
+        # Step 1: Find the worst (highest number) position this team ever finished
+        worst_position = max(get_team_metrics(tbl, team)[0] for tbl in placements)
+
+        # Step 2: Filter only the tables where the team finished in that exact worst position
+        tied_tables = [tbl for tbl in placements if get_team_metrics(tbl, team)[0] == worst_position]
+
+        # Step 3: From those, return the one where they had the fewest points
+        return min(tied_tables, key=lambda tbl: get_team_metrics(tbl, team)[1])
 
 
 # Get the table and show it
