@@ -9,11 +9,24 @@ st.title("🔮 2025–26 Premier League Simulator")
 
 runs = st.slider("Number of simulations", min_value=1000, max_value=10000, step=1000, value=1000)
     
-placements = []
-progress_bar = st.progress(0)
+if "placements" not in st.session_state or st.session_state.runs != runs:
+    st.session_state.placements = []
+    st.session_state.runs = runs
 
-with st.spinner(f"Simulating {runs:,} seasons..."):
-    for i in range(runs):
+    progress_bar = st.progress(0)
+    with st.spinner(f"Simulating {runs:,} seasons..."):
+        for i in range(runs):
+            try:
+                df = simulate_season()
+                st.session_state.placements.append(df)
+            except Exception as e:
+                st.warning(f"Simulation {i+1} failed: {e}")
+
+            if i % 100 == 0:
+                progress_bar.progress(i / runs)
+
+placements = st.session_state.placements
+
         try:
             df = simulate_season()
             placements.append(df)
@@ -48,9 +61,36 @@ for team in df['Team']:
         "Most Common Position": most_common
     })
 
+def get_team_position_and_points(table, team):
+    row = table[table['Team'] == team]
+    if row.empty:
+        return (999, -1)  # fallback
+    return int(row['Position'].values[0]), int(row['Pts'].values[0])
+
+def get_best_or_worst_table(placements, team, mode="Best"):
+    reverse = mode == "Worst"
+
+    def sort_key(tbl):
+        pos, pts = get_team_position_and_points(tbl, team)
+        return (pos, pts if not reverse else -pts)
+
+    return sorted(placements, key=sort_key, reverse=reverse)[0]
+
+
 st.header("📊 Season Outcome Summary")
 st.dataframe(pd.DataFrame(results).sort_values("Titles", ascending=False))
 st.header("🔍 View Best or Worst Season for a Team")
+
+team_options = df['Team'].tolist()
+selected_team = st.selectbox("Choose a team", team_options, key="team_select")
+mode = st.selectbox("Choose view", ["Best", "Worst"], key="mode_select")
+
+selected_table = get_best_or_worst_table(placements, selected_team, mode)
+
+st.subheader(f"{mode} Season for {selected_team}")
+st.dataframe(
+    selected_table[['Position', 'Team', 'W', 'D', 'L', 'Pts', 'GF', 'GA', 'GD']].sort_values("Position")
+)
 
 # Select team and view mode
 team_options = df['Team'].tolist()
