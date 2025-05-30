@@ -1,46 +1,47 @@
 import numpy as np
 import pandas as pd
-import random
 
-teams = [
+TEAMS = [
     'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
     'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham',
-    'Liverpool', 'Luton', 'Man City', 'Man Utd', 'Newcastle',
-    'Nottingham Forest', 'Sheffield Utd', 'Tottenham', 'West Ham', 'Wolves'
+    'Leeds', 'Liverpool', 'Man City', 'Man Utd', 'Newcastle',
+    'Nottingham Forest', 'Sunderland', 'Tottenham', 'West Ham', 'Wolverhampton'
 ]
 
-team_ratings = {
+RATINGS = {
     "Liverpool": 99,
-    "Arsenal": 95,
-    "Man City": 92,
-    "Chelsea": 84,
+    "Man City": 97,
+    "Arsenal": 96,
     "Newcastle": 83,
-    "Tottenham": 75,
-    "Man Utd": 74,
-    "Aston Villa": 72,
-    "Brighton": 69,
-    "Brentford": 67,
-    "Bournemouth": 67,
-    "Nottingham Forest": 67,
-    "Crystal Palace": 66,
-    "Fulham": 64,
-    "West Ham": 62,
-    "Wolves": 60,
-    "Burnley": 54,
-    "Sheffield Utd": 52,
-    "Luton": 50,
-    "Everton": 69
+    "Chelsea": 76,
+    "Aston Villa": 76,
+    "Man Utd": 69,
+    "Tottenham": 67,
+    "Nottingham Forest": 61,
+    "Brighton": 57,
+    "Bournemouth": 54,
+    "West Ham": 52,
+    "Everton": 52,
+    "Crystal Palace": 51,
+    "Fulham": 50,
+    "Brentford": 50,
+    "Wolverhampton": 50,
+    "Burnley": 49,
+    "Leeds": 49,
+    "Sunderland": 47
 }
 
+
 def simulate_season():
-    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in teams}
-    
-    for i, home in enumerate(teams):
-        for j, away in enumerate(teams):
+    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
+    for i, home in enumerate(TEAMS):
+        for j, away in enumerate(TEAMS):
             if i == j:
                 continue
-            home_attack = team_ratings.get(home, 60)
-            away_attack = team_ratings.get(away, 60)
+
+            home_attack = RATINGS[home]
+            away_attack = RATINGS[away]
+
             home_goals = np.random.poisson(home_attack / 25)
             away_goals = np.random.poisson(away_attack / 30)
 
