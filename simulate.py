@@ -55,25 +55,20 @@ def simulate_season():
             home_rating = RATINGS[home]
             away_rating = RATINGS[away]
 
-            # Strength including home advantage
             home_strength = home_rating + 5
             away_strength = away_rating
 
-            # Expected goals
             home_expectation = (home_strength / (home_strength + away_strength)) * AVERAGE_GOALS_PER_GAME
             away_expectation = (away_strength / (home_strength + away_strength)) * AVERAGE_GOALS_PER_GAME
 
-            home_expectation *= HOME_ADVANTAGE  # apply global home boost
+            home_expectation *= HOME_ADVANTAGE
 
-            # Adjust for weak teams
             expected_home_goals = adjust_for_weak_team(home, home_expectation)
             expected_away_goals = adjust_for_weak_team(away, away_expectation)
 
-            # Simulate goals using Poisson distribution
             home_goals = np.random.poisson(expected_home_goals)
             away_goals = np.random.poisson(expected_away_goals)
 
-            # Update table stats
             table[home]['GF'] += home_goals
             table[home]['GA'] += away_goals
             table[away]['GF'] += away_goals
@@ -93,10 +88,22 @@ def simulate_season():
                 table[home]['D'] += 1
                 table[away]['D'] += 1
 
-    # Convert to DataFrame and sort
+    # Convert to DataFrame
     df = pd.DataFrame(table).T
     df['GD'] = df['GF'] - df['GA']
     df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
     df = df.reset_index().rename(columns={'index': 'Team'})
     df['Position'] = range(1, len(df) + 1)
+
+    # --- 🔧 Normalize point distribution ---
+    current_max = df['Pts'].max()
+    target_max = 92  # realistic top score
+    current_min = df['Pts'].min()
+    target_min = 25  # realistic 20th place
+
+    # Apply linear scaling
+    df['Pts'] = df['Pts'].apply(lambda x: round(
+        ((x - current_min) / (current_max - current_min)) * (target_max - target_min) + target_min
+    ))
+
     return df
