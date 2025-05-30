@@ -11,7 +11,7 @@ TEAMS = [
 RATINGS = {
     "Liverpool": 99,
     "Man City": 97,
-    "Arsenal": 96,
+    "Arsenal": 96.5,
     "Newcastle": 84,
     "Chelsea": 79,
     "Aston Villa": 77,
