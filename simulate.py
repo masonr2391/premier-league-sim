@@ -9,31 +9,32 @@ TEAMS = [
 ]
 
 RATINGS = {
-    "Liverpool": 99,
-    "Man City": 97,
-    "Arsenal": 96.5,
-    "Newcastle": 84,
-    "Chelsea": 79,
+    "Liverpool": 85,
+    "Man City": 84,
+    "Arsenal": 83,
+    "Newcastle": 80,
+    "Chelsea": 78,
     "Aston Villa": 77,
-    "Man Utd": 71,
-    "Tottenham": 69,
-    "Nottingham Forest": 63,
-    "Brighton": 59,
-    "Bournemouth": 57,
-    "West Ham": 55,
-    "Everton": 55,
-    "Crystal Palace": 54,
-    "Fulham": 53,
-    "Brentford": 51,
-    "Wolverhampton": 51,
-    "Burnley": 48,
-    "Leeds": 48,
-    "Sunderland": 46
+    "Man Utd": 76,
+    "Tottenham": 75,
+    "Nottingham Forest": 72,
+    "Brighton": 71,
+    "Bournemouth": 70,
+    "West Ham": 69,
+    "Everton": 68,
+    "Crystal Palace": 67,
+    "Fulham": 66,
+    "Brentford": 65,
+    "Wolverhampton": 64,
+    "Burnley": 63,
+    "Leeds": 62,
+    "Sunderland": 61
 }
 
+
 # Goal model calibration
-AVERAGE_GOALS_PER_GAME = 2.45  # More in line with PL average
-HOME_ADVANTAGE = 1.1  # 10% boost to expected goals at home
+AVERAGE_GOALS_PER_GAME = 2.85  # Updated to reflect recent PL average
+HOME_ADVANTAGE = 1.05  # Reduced to better match historical home win rates
 
 # Apply a realism modifier for weak teams
 def adjust_for_weak_team(team, base_expected):
@@ -45,6 +46,7 @@ def adjust_for_weak_team(team, base_expected):
         return base_expected
 
 def simulate_season():
+        MAX_GOALS_PER_TEAM = 5  # Cap to prevent unrealistic high scores
     table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
     
     for i, home in enumerate(TEAMS):
@@ -63,8 +65,10 @@ def simulate_season():
             expected_away_goals = adjust_for_weak_team(away, raw_away_goals)
 
             # Simulate goals using Poisson distribution
-            home_goals = np.random.poisson(expected_home_goals)
-            away_goals = np.random.poisson(expected_away_goals)
+# Simulate goals using Poisson distribution and cap results
+home_goals = min(np.random.poisson(expected_home_goals), MAX_GOALS_PER_TEAM)
+away_goals = min(np.random.poisson(expected_away_goals), MAX_GOALS_PER_TEAM)
+
 
             # Adjust scores to reinforce realism
             if home_goals > away_goals:
@@ -81,17 +85,17 @@ def simulate_season():
                 elif margin >= 3 and np.random.rand() < 0.3:
                     home_goals += 1
 
-            else:  # draw
-                if home_goals > 2:
-                    home_goals = away_goals = 2  # cap high-scoring draws
-                elif home_goals == 0 and np.random.rand() < 0.3:
-                    home_goals = away_goals = 1  # fewer 0-0s
-                elif np.random.rand() < 0.4:
-                    # convert some draws to wins to reduce total draw count
-                    if np.random.rand() < 0.5:
-                        home_goals += 1
-                    else:
-                        away_goals += 1
+else:  # draw
+    if home_goals > 2:
+        home_goals = away_goals = 2  # cap high-scoring draws
+    elif home_goals == 0 and np.random.rand() < 0.3:
+        home_goals = away_goals = 1  # fewer 0-0s
+    elif np.random.rand() < 0.2:  # less likely to turn draws into wins
+        if np.random.rand() < 0.5:
+            home_goals += 1
+        else:
+            away_goals += 1
+
 
             table[home]['GF'] += home_goals
             table[home]['GA'] += away_goals
