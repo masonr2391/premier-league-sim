@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 import random
 
-# Hardcoded 2025–26 teams (edit names/strengths as needed)
-
 teams = [
     'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
     'Burnley', 'Chelsea', 'Crystal Palace', 'Everton', 'Fulham',
@@ -11,15 +9,13 @@ teams = [
     'Nottingham Forest', 'Sheffield Utd', 'Tottenham', 'West Ham', 'Wolves'
 ]
 
-
-# Simplified team ratings (higher = stronger team)
 team_ratings = {
     "Liverpool": 99,
     "Arsenal": 95,
     "Man City": 92,
     "Chelsea": 84,
-    "Newcastle United": 83,
-    "Tottenham Hotspur": 75,
+    "Newcastle": 83,
+    "Tottenham": 75,
     "Man Utd": 74,
     "Aston Villa": 72,
     "Brighton": 69,
@@ -28,26 +24,23 @@ team_ratings = {
     "Nottingham Forest": 67,
     "Crystal Palace": 66,
     "Fulham": 64,
-    "Leeds United": 61,
-    "West Ham United": 62,
-    "Wolverhampton": 60,
+    "West Ham": 62,
+    "Wolves": 60,
     "Burnley": 54,
-    "Sunderland": 46,
+    "Sheffield Utd": 52,
+    "Luton": 50,
     "Everton": 69
 }
 
-
-
 def simulate_season():
-    # Create blank table
-    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
-    for i, home in enumerate(TEAMS):
-        for j, away in enumerate(TEAMS):
+    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in teams}
+    
+    for i, home in enumerate(teams):
+        for j, away in enumerate(teams):
             if i == j:
                 continue
-            # Basic Poisson model using team strength
-            home_attack = RATINGS[home]
-            away_attack = RATINGS[away]
+            home_attack = team_ratings.get(home, 60)
+            away_attack = team_ratings.get(away, 60)
             home_goals = np.random.poisson(home_attack / 25)
             away_goals = np.random.poisson(away_attack / 30)
 
@@ -70,10 +63,9 @@ def simulate_season():
                 table[home]['D'] += 1
                 table[away]['D'] += 1
 
-df = pd.DataFrame(table).T
-df['GD'] = df['GF'] - df['GA']
-df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
-df = df.reset_index().rename(columns={'index': 'Team'})
-df['Position'] = range(1, len(df) + 1)
-return df
-
+    df = pd.DataFrame(table).T
+    df['GD'] = df['GF'] - df['GA']
+    df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
+    df = df.reset_index().rename(columns={'index': 'Team'})
+    df['Position'] = range(1, len(df) + 1)
+    return df
