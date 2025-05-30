@@ -31,6 +31,11 @@ RATINGS = {
     "Sunderland": 46
 }
 
+# Goal model calibration
+AVERAGE_GOALS_PER_GAME = 2.6
+HOME_ADVANTAGE = 1.1  # 10% boost to expected goals at home
+
+
 
 def simulate_season():
     table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
@@ -39,11 +44,18 @@ def simulate_season():
             if i == j:
                 continue
 
-            home_attack = RATINGS[home]
-            away_attack = RATINGS[away]
+         home_rating = RATINGS[home]
+away_rating = RATINGS[away]
 
-            home_goals = np.random.poisson(home_attack / 25)
-            away_goals = np.random.poisson(away_attack / 30)
+# Scale ratings into expected goals
+# The higher the rating, the more attacking strength
+expected_home_goals = (home_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME * HOME_ADVANTAGE
+expected_away_goals = (away_rating / (home_rating + away_rating)) * AVERAGE_GOALS_PER_GAME
+
+# Simulate goals using Poisson distribution
+home_goals = np.random.poisson(expected_home_goals)
+away_goals = np.random.poisson(expected_away_goals)
+
 
             table[home]['GF'] += home_goals
             table[home]['GA'] += away_goals
