@@ -50,3 +50,30 @@ for team in df['Team']:
 
 st.header("📊 Season Outcome Summary")
 st.dataframe(pd.DataFrame(results).sort_values("Titles", ascending=False))
+
+st.header("📈 Explore Best/Worst Season for a Team")
+
+# UI controls
+team_options = df['Team'].tolist()
+selected_team = st.selectbox("Select a team", team_options)
+best_or_worst = st.selectbox("Select best or worst season", ["Best", "Worst"])
+
+# Find the simulation where the selected team had their best/worst position
+def get_best_or_worst_table(placements, team, mode="Best"):
+    if mode == "Best":
+        best_index = min(
+            enumerate(placements),
+            key=lambda x: x[1].loc[x[1]['Team'] == team, 'Position'].values[0]
+        )[0]
+    else:
+        best_index = max(
+            enumerate(placements),
+            key=lambda x: x[1].loc[x[1]['Team'] == team, 'Position'].values[0]
+        )[0]
+    return placements[best_index]
+
+# Get the table and show it
+selected_table = get_best_or_worst_table(placements, selected_team, best_or_worst)
+st.subheader(f"{best_or_worst} Season for {selected_team}")
+st.dataframe(selected_table[['Team', 'W', 'D', 'L', 'Pts', 'GF', 'GA', 'GD', 'Position']])
+
