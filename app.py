@@ -50,6 +50,30 @@ for team in df['Team']:
 
 st.header("📊 Season Outcome Summary")
 st.dataframe(pd.DataFrame(results).sort_values("Titles", ascending=False))
+st.header("🔍 View Best or Worst Season for a Team")
+
+# Select team and view mode
+team_options = df['Team'].tolist()
+selected_team = st.selectbox("Choose a team", team_options, key="team_select")
+mode = st.selectbox("Choose view", ["Best", "Worst"], key="mode_select")
+
+# Function to get position of team in a table
+def get_team_position(table, team):
+    row = table[table['Team'] == team]
+    if not row.empty:
+        return int(row['Position'].values[0])
+    return 999  # Fallback if team not found
+
+# Find the best or worst simulation
+if mode == "Best":
+    best_table = min(placements, key=lambda tbl: get_team_position(tbl, selected_team))
+else:
+    best_table = max(placements, key=lambda tbl: get_team_position(tbl, selected_team))
+
+# Show result
+st.subheader(f"{mode} Season for {selected_team}")
+st.dataframe(best_table[['Position', 'Team', 'W', 'D', 'L', 'Pts', 'GF', 'GA', 'GD']].sort_values("Position"))
+
 
 st.header("📈 Explore Best/Worst Season for a Team")
 
