@@ -38,31 +38,42 @@ def draw_weighted(prob_dict, n=1, exclude=set()):
     return list(np.random.choice(teams, size=n, replace=False, p=norm_weights))
 
 def simulate_season():
-    title_winner = draw_weighted(TITLE_PROBS)[0]
-    top4_teams = set(draw_weighted(TOP4_PROBS, 4, exclude={title_winner}))
-    top4_teams.add(title_winner)
-    relegated_teams = set(draw_weighted(RELEGATION_PROBS, 3))
+    # Normalize probabilities for scoring
+    def normalize(probs):
+        max_val = max(probs.values())
+        return {team: val / max_val for team, val in probs.items()}
 
-    # Build a plausible table based on this outcome
-    teams = TEAMS.copy()
-    np.random.shuffle(teams)
+    norm_title = normalize(TITLE_PROBS)
+    norm_top4 = normalize(TOP4_PROBS)
+    norm_releg = normalize({team: 100 - v for team, v in RELEGATION_PROBS.items()})  # invert so high = better
 
+    team_scores = {}
+    for team in TEAMS:
+        # Weighted score: title is most important, top 4 secondary, relegation avoidance also considered
+        score = (
+            norm_title.get(team, 0) * 0.6 +
+            norm_top4.get(team, 0) * 0.3 +
+            norm_releg.get(team, 0) * 0.1
+        )
+        # Add randomness so results vary across simulations
+        score += np.random.normal(0, 0.05)
+        team_scores[team] = score
+
+    # Rank teams based on total score
+    ranked_teams = sorted(team_scores.items(), key=lambda x: x[1], reverse=True)
     table_data = []
-    for team in teams:
-        if team == title_winner:
-            pos = 1
+
+    for idx, (team, score) in enumerate(ranked_teams):
+        pos = idx + 1
+        if pos == 1:
             pts = np.random.randint(88, 95)
-        elif team in top4_teams:
-            pos = np.random.randint(2, 5)
+        elif pos <= 4:
             pts = np.random.randint(75, 87)
-        elif team in relegated_teams:
-            pos = np.random.randint(18, 21)
+        elif pos >= 18:
             pts = np.random.randint(18, 34)
         else:
-            pos = np.random.randint(5, 18)
             pts = np.random.randint(35, 74)
 
-        # Random goal data
         gf = np.random.randint(30, 90)
         ga = np.random.randint(20, 85)
         w = np.random.randint(5, 25)
