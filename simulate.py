@@ -48,39 +48,26 @@ def simulate_season():
     np.random.shuffle(teams)
 
     table_data = []
+    for team in teams:
+        if team == title_winner:
+            pos = 1
+            pts = np.random.randint(88, 95)
+        elif team in top4_teams:
+            pos = np.random.randint(2, 5)
+            pts = np.random.randint(75, 87)
+        elif team in relegated_teams:
+            pos = np.random.randint(18, 21)
+            pts = np.random.randint(18, 34)
+        else:
+            pos = np.random.randint(5, 18)
+            pts = np.random.randint(35, 74)
 
-    # Define average points by position
-    avg_pts_by_pos = [
-        90, 85, 78, 72, 66, 62, 58, 55, 52, 49,
-        46, 43, 41, 39, 37, 35, 33, 31, 29, 27
-    ]
-
-    # Assign teams to positions based on strength (probability order)
-    # Sort teams by TITLE_PROBS (more likely winner = better team)
-    ordered_teams = sorted(TEAMS, key=lambda t: -TITLE_PROBS.get(t, 0))
-    
-    for pos, team in enumerate(ordered_teams, start=1):
-        mean_pts = avg_pts_by_pos[pos - 1]
-        pts = int(np.random.normal(loc=mean_pts, scale=3))  # add small randomness
-
+        # Random goal data
         gf = np.random.randint(30, 90)
         ga = np.random.randint(20, 85)
         w = np.random.randint(5, 25)
         d = np.random.randint(0, 15)
         l = 38 - w - d
-
-        table_data.append({
-            "Team": team,
-            "W": w,
-            "D": d,
-            "L": l,
-            "GF": gf,
-            "GA": ga,
-            "GD": gf - ga,
-            "Pts": pts,
-            "Position": pos
-        })
-
 
         table_data.append({
             "Team": team,
