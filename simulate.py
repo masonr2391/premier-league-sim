@@ -9,27 +9,28 @@ TEAMS = [
 ]
 
 RATINGS = {
-    "Man City": 95,
-    "Liverpool": 92,
-    "Arsenal": 89,
-    "Chelsea": 84,
-    "Newcastle": 83,
-    "Man Utd": 81,
-    "Tottenham": 80,
-    "Aston Villa": 78,
-    "Brighton": 76,
-    "West Ham": 74,
-    "Brentford": 72,
-    "Fulham": 71,
-    "Crystal Palace": 70,
-    "Bournemouth": 69,
-    "Everton": 68,
-    "Wolverhampton": 67,
-    "Nottingham Forest": 65,
-    "Burnley": 62,
-    "Leeds": 60,
-    "Sunderland": 58
+    "Liverpool": 96,
+    "Arsenal": 94,
+    "Man City": 93,
+    "Newcastle": 88,
+    "Chelsea": 85,
+    "Aston Villa": 83,
+    "Brighton": 82,
+    "Nottingham Forest": 81,
+    "Man Utd": 79,
+    "Tottenham": 78,
+    "Bournemouth": 76,
+    "Brentford": 75,
+    "Fulham": 74,
+    "Everton": 73,
+    "Crystal Palace": 72,
+    "West Ham": 71,
+    "Wolverhampton": 70,
+    "Leeds": 68,
+    "Burnley": 67,
+    "Sunderland": 66
 }
+
 
 # Goal model calibration
 AVERAGE_GOALS_PER_GAME = 2.85
