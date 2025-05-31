@@ -1,5 +1,6 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+import random
 
 TEAMS = [
     'Arsenal', 'Aston Villa', 'Bournemouth', 'Brentford', 'Brighton',
@@ -8,109 +9,79 @@ TEAMS = [
     'Nottingham Forest', 'Sunderland', 'Tottenham', 'West Ham', 'Wolverhampton'
 ]
 
-RATINGS = {
-    "Liverpool": 96,
-    "Arsenal": 94,
-    "Man City": 93,
-    "Newcastle": 88,
-    "Chelsea": 85,
-    "Aston Villa": 83,
-    "Brighton": 82,
-    "Nottingham Forest": 81,
-    "Man Utd": 79,
-    "Tottenham": 78,
-    "Bournemouth": 76,
-    "Brentford": 75,
-    "Fulham": 74,
-    "Everton": 73,
-    "Crystal Palace": 72,
-    "West Ham": 71,
-    "Wolverhampton": 70,
-    "Leeds": 68,
-    "Burnley": 67,
-    "Sunderland": 66
+TITLE_PROBS = {
+    "Liverpool": 30.82, "Arsenal": 28.53, "Man City": 26.68, "Newcastle": 6.59, "Chelsea": 3.87,
+    "Aston Villa": 2.42, "Brighton": 1.57, "Nottingham Forest": 1.25, "Man Utd": 0.41, "Tottenham": 0.39,
+    "Bournemouth": 0.29, "Brentford": 0.21, "Fulham": 0.19, "Everton": 0.14, "Crystal Palace": 0.12,
+    "West Ham": 0.09, "Wolverhampton": 0.08, "Leeds": 0.06, "Burnley": 0.04, "Sunderland": 0.03
 }
 
+TOP4_PROBS = {
+    "Liverpool": 92.3, "Arsenal": 89.5, "Man City": 87.1, "Newcastle": 58.2, "Chelsea": 39.4,
+    "Aston Villa": 34.7, "Brighton": 27.6, "Nottingham Forest": 18.5, "Man Utd": 8.3, "Tottenham": 5.5,
+    "Bournemouth": 4.2, "Brentford": 2.7, "Fulham": 2.3, "Everton": 1.9, "Crystal Palace": 1.6,
+    "West Ham": 1.4, "Wolverhampton": 1.2, "Leeds": 0.5, "Burnley": 0.3, "Sunderland": 0.2
+}
 
-# Goal model calibration
-AVERAGE_GOALS_PER_GAME = 2.85
-HOME_ADVANTAGE = 1.05  # Reduced to better match historical home win rates
+RELEGATION_PROBS = {
+    "Sunderland": 97.13, "Burnley": 94.88, "Leeds": 86.71, "Wolverhampton": 42.92, "West Ham": 28.43,
+    "Crystal Palace": 14.62, "Everton": 12.37, "Fulham": 9.48, "Brentford": 8.29, "Bournemouth": 7.53,
+    "Tottenham": 3.74, "Man Utd": 2.11, "Nottingham Forest": 0.91, "Brighton": 0.83, "Aston Villa": 0.67,
+    "Chelsea": 0.43, "Newcastle": 0.31, "Man City": 0.17, "Arsenal": 0.13, "Liverpool": 0.09
+}
 
-# Apply a realism modifier for weak teams
-def adjust_for_weak_team(team, base_expected):
-    if RATINGS[team] <= 50:
-        return base_expected * 0.9
-    elif RATINGS[team] <= 55:
-        return base_expected * 0.95
-    else:
-        return base_expected
+def draw_weighted(prob_dict, n=1, exclude=set()):
+    items = [(team, prob) for team, prob in prob_dict.items() if team not in exclude]
+    teams, weights = zip(*items)
+    total = sum(weights)
+    norm_weights = [w / total for w in weights]
+    return list(np.random.choice(teams, size=n, replace=False, p=norm_weights))
 
 def simulate_season():
-    table = {team: {'Pts': 0, 'GF': 0, 'GA': 0, 'W': 0, 'D': 0, 'L': 0} for team in TEAMS}
+    title_winner = draw_weighted(TITLE_PROBS)[0]
+    top4_teams = set(draw_weighted(TOP4_PROBS, 4, exclude={title_winner}))
+    top4_teams.add(title_winner)
+    relegated_teams = set(draw_weighted(RELEGATION_PROBS, 3))
 
-    for i, home in enumerate(TEAMS):
-        for j, away in enumerate(TEAMS):
-            if i == j:
-                continue
+    # Build a plausible table based on this outcome
+    teams = TEAMS.copy()
+    np.random.shuffle(teams)
 
-            home_rating = RATINGS[home]
-            away_rating = RATINGS[away]
+    table_data = []
+    for team in teams:
+        if team == title_winner:
+            pos = 1
+            pts = np.random.randint(88, 95)
+        elif team in top4_teams:
+            pos = np.random.randint(2, 5)
+            pts = np.random.randint(75, 87)
+        elif team in relegated_teams:
+            pos = np.random.randint(18, 21)
+            pts = np.random.randint(18, 34)
+        else:
+            pos = np.random.randint(5, 18)
+            pts = np.random.randint(35, 74)
 
-            home_strength = home_rating + 5  # Home boost
-            away_strength = away_rating
+        # Random goal data
+        gf = np.random.randint(30, 90)
+        ga = np.random.randint(20, 85)
+        w = np.random.randint(5, 25)
+        d = np.random.randint(0, 15)
+        l = 38 - w - d
 
-            home_expectation = (home_strength / (home_strength + away_strength)) * AVERAGE_GOALS_PER_GAME
-            away_expectation = (away_strength / (home_strength + away_strength)) * AVERAGE_GOALS_PER_GAME
+        table_data.append({
+            "Team": team,
+            "W": w,
+            "D": d,
+            "L": l,
+            "GF": gf,
+            "GA": ga,
+            "GD": gf - ga,
+            "Pts": pts,
+            "Position": pos
+        })
 
-            home_expectation *= HOME_ADVANTAGE
-
-            expected_home_goals = adjust_for_weak_team(home, home_expectation)
-            expected_away_goals = adjust_for_weak_team(away, away_expectation)
-
-            home_goals = np.random.poisson(expected_home_goals)
-            away_goals = np.random.poisson(expected_away_goals)
-
-            table[home]['GF'] += home_goals
-            table[home]['GA'] += away_goals
-            table[away]['GF'] += away_goals
-            table[away]['GA'] += home_goals
-
-            if home_goals > away_goals:
-                table[home]['Pts'] += 3
-                table[home]['W'] += 1
-                table[away]['L'] += 1
-            elif away_goals > home_goals:
-                table[away]['Pts'] += 3
-                table[away]['W'] += 1
-                table[home]['L'] += 1
-            else:
-                table[home]['Pts'] += 1
-                table[away]['Pts'] += 1
-                table[home]['D'] += 1
-                table[away]['D'] += 1
-
-    # Convert to DataFrame and rank
-    df = pd.DataFrame(table).T
-    df['GD'] = df['GF'] - df['GA']
-    df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False)
-    df = df.reset_index().rename(columns={'index': 'Team'})
+    df = pd.DataFrame(table_data)
+    df = df.sort_values(by=['Position', 'Pts', 'GD', 'GF'], ascending=[True, False, False, False]).reset_index(drop=True)
     df['Position'] = range(1, len(df) + 1)
-
-    # --- 🔧 Soft-normalize point totals with noise ---
-    current_max = df['Pts'].max()
-    current_min = df['Pts'].min()
-    target_max = 92 + np.random.randint(-3, 4)  # ~89–95
-    target_min = 24 + np.random.randint(-4, 5)  # ~20–28
-
-    def rescale_with_noise(x):
-        scaled = ((x - current_min) / (current_max - current_min)) * (target_max - target_min) + target_min
-        noise = np.random.normal(0, 1.5)  # small Gaussian noise
-        return max(0, round(scaled + noise))
-
-    df['Pts'] = df['Pts'].apply(rescale_with_noise)
-
-    # Sort again in case noise causes rank swaps
-    df = df.sort_values(by=['Pts', 'GD', 'GF'], ascending=False).reset_index(drop=True)
-    df['Position'] = range(1, len(df) + 1)
-
     return df
